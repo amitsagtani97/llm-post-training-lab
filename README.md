@@ -1,15 +1,38 @@
-# Practical ML Infrastructure Learning Guide
+# GPU ML Infrastructure Learning Guide
 
-Learn ML infrastructure through small experiments: run an open-weight model, measure its behavior, explain performance, serve it, and operate it reliably. Extend the same system with evaluated retrieval, model adaptation, and distributed execution as the foundations become clear.
+Learn GPU-based ML infrastructure through small experiments: run an open-weight model, measure its behavior, explain performance, serve it, and operate it reliably. Extend the same system with evaluated retrieval, model adaptation, and distributed execution as the foundations become clear.
 
 This README contains the learning sequence and completion checklist. Check off a step when it has been executed and reviewed, with evidence in a notebook or report. Code that has only been written does not count as a completed experiment.
 
 ## Start here
 
 - **Current lesson:** milestone 2 — trustworthy benchmarking and token-level latency.
-- **Next practical step:** run the first notebook on CPU with `MEASURE_TOKEN_TIMING = True`, preserve the complete exports, and compare its diagnostic pass with the existing GPU diagnostic pass.
-- **Current notebook:** [01 — inference on CPU, then GPU](notebooks/01-gpu-inference.ipynb).
-- **Benchmark results and hardware configurations:** [CPU versus T4 GPU report](results/cpu-vs-gpu.md). Run measurements, explanations, configurations, raw-artifact links, and experiment history belong in that report.
+- **Next practical step:** review the completed FP32/FP16 run one comparison at a time: generation time, first-token wait, then memory. Continue to batching once those measurements are clear.
+- **Current notebook:** [02 — GPU workloads and precision](notebooks/02-gpu-benchmark.ipynb). Executed on a T4; 96 requests completed successfully. Interpretation is still being worked through. [Lesson 01](notebooks/01-gpu-inference.ipynb) remains available for reference.
+- **Future scope:** GPU inference, memory, profiling, serving, and operations. Additional CPU benchmarks are skipped. Keep the existing CPU results as historical evidence, with their original limitations.
+- **Benchmark results and hardware configurations:** [CPU versus T4 GPU report](results/cpu-vs-gpu.md) and [FP32 versus FP16 summary CSV](results/gpu-fp32-vs-fp16.csv). The CSV includes measurements, definitions, hardware/software, reasoning, and limitations; full request records remain in the executed notebook.
+
+## Next lesson: repeatable GPU benchmarks and precision
+
+**Notebook:** [02 — GPU workloads: FP32 versus FP16](notebooks/02-gpu-benchmark.ipynb).
+
+**Status:** GPU execution and result recording are complete (run `20261122T214341Z-f97511de`). Understanding and interpretation remain in progress. See the [brief comparison CSV](results/gpu-fp32-vs-fp16.csv).
+
+**Question:** how does FP16 change latency, memory, and response quality for the same model on the same GPU?
+
+- [x] Require a CUDA GPU and print the actual device, driver, PyTorch/CUDA versions, and available memory before running.
+- [x] Keep the existing model and pin its revision so this experiment changes precision rather than model identity.
+- [x] Define a small fixed workload suite with stable prompt IDs and short, medium, and longer inputs; record actual token counts after chat formatting.
+- [x] Run an FP32 baseline for each workload with explicit warmup and repeated measurements.
+- [x] Run FP16 on the same GPU with the same prompts, generation settings, and output budgets; release the previous model before loading the next precision.
+- [x] Record baseline generation latency/output rate and a separate instrumented TTFT/TPOT/ITL pass, plus allocated/reserved GPU memory.
+- [x] Preserve actual output lengths and full responses; inspect output differences and any numerical failures.
+- [x] Print and save per-request results, then write a separate comparison CSV.
+- [ ] Explain the measured differences and timing boundaries comfortably before marking the lesson complete.
+
+Finish the repeatable FP32 workload baseline before interpreting the precision comparison. Change one variable within each matched workload comparison. More input lengths provide workload coverage; they are not evidence of a precision effect by themselves.
+
+Use a fresh GPU session so a previously loaded model cannot inflate memory measurements. Defaults run the three workloads in both precisions, with separate baseline and diagnostic passes. Every request is checkpointed to JSON outside the generation timer; final request/summary CSVs and the full JSON are printed, and one optional ZIP download preserves the run. Review full responses and stop reasons alongside performance before creating the results report.
 
 ## How to use this guide
 
@@ -20,7 +43,7 @@ This README contains the learning sequence and completion checklist. Check off a
 5. Update the relevant checkboxes here and choose the next unfinished step.
 6. Advance when the milestone's completion criterion is met. Use evidence rather than a fixed weekly deadline.
 
-`[x]` means completed with reviewed evidence. `[ ]` means work remains. Split partially completed tasks so completed work and remaining work are visible. Revisiting a topic with a new workload is a new experiment; it does not erase earlier results.
+`[x]` means completed with reviewed evidence. `[ ]` means work remains. Tasks labeled **Skipped** are outside the current scope and do not count as completed experiments. Split partially completed tasks so completed work and remaining work are visible. Revisiting a topic with a new workload is a new experiment; it does not erase earlier results.
 
 ## Learning sequence
 
@@ -29,7 +52,7 @@ This README contains the learning sequence and completion checklist. Check off a
 | 0. Establish the workspace | Runtimes, dependencies, files, and experiment records | Working notebook workflow and this guide | Complete |
 | 1. Run inference | Tokenization, model loading, devices, and generation | Executed CPU/GPU inference notebook | Complete |
 | 2. Measure correctly | Timing boundaries, warmup, token latency, and reproducibility | Comparable baseline and diagnostic reports | In progress |
-| 3. Explain performance | CPU threading, GPU execution, precision, caching, and batching | Controlled experiments with explanations | Not started |
+| 3. Explain performance | GPU execution, precision, memory, caching, and batching | Controlled experiments with explanations | Not started |
 | 4. Serve one model | Linux processes, containers, HTTP, streaming, and readiness | Reproducible inference server and client | Not started |
 | 5. Handle demand and failures | Queueing, scheduling, capacity, backpressure, and recovery | Load tests and failure observations | Not started |
 | 6. Operate a service | Deployment, storage, metrics, evaluation gates, and cost | Observable, reproducible service on a GPU host | Not started |
@@ -37,7 +60,9 @@ This README contains the learning sequence and completion checklist. Check off a
 | 8. Adapt and manage models | Dataset lifecycle, fine-tuning, post-training, and release decisions | Evaluated adapted model and reproducible training run | Later extension |
 | 9. Scale beyond one device | Parallelism, distributed execution, scheduling, and system design | Scaling experiment justified by measured limits | Advanced extension |
 
-The initial focus is LLM inference. The lessons in workload measurement, resource management, deployment, reliability, and reproducibility also apply to other ML systems. The advanced extensions are learning tracks selected when the preceding system and available compute justify them.
+The initial focus is GPU LLM inference. New performance lessons must verify a CUDA GPU and stop with a clear message if one is unavailable. The first notebook retains its original CPU fallback for the completed introductory comparison. Host CPU activity still matters when it feeds GPU execution, tokenizes inputs, or handles requests; observing those interactions is part of GPU infrastructure, without adding standalone CPU optimization experiments.
+
+The lessons in workload measurement, resource management, deployment, reliability, and reproducibility also apply to other ML systems. The advanced extensions are learning tracks selected when the preceding system and available compute justify them.
 
 ### 0. Establish the workspace
 
@@ -86,14 +111,15 @@ The initial focus is LLM inference. The lessons in workload measurement, resourc
 - [x] Run a separate GPU token-diagnostic pass and retain TTFT, TPOT, ITL, and per-token arrival times.
 - [x] Document callback overhead and distinguish instrumented measurements from the original baseline.
 - [x] Write a comparison report that separates observations, hypotheses, and unmeasured quantities.
-- [ ] Rerun CPU inference and preserve complete JSON/CSV exports, including full responses and token IDs; the existing CPU record is a reviewed summary.
-- [ ] Run CPU token diagnostics and compare CPU/GPU using the same measurement mode.
 - [ ] Expand to a fixed prompt suite with stable IDs and representative input/output lengths.
 - [ ] Increase repetitions and report sample counts and uncertainty before making tail-latency claims.
-- [ ] Capture missing environment details such as exact CPU model, available CPU quota/affinity, GPU driver, and relevant kernel packages.
-- [ ] Measure CPU process memory, GPU reserved memory, and device-wide usage with clearly stated definitions.
+- [ ] Capture missing GPU environment details, including driver version and relevant kernel packages, plus host metadata needed to reproduce the GPU workload.
+- [ ] Measure GPU reserved memory and device-wide usage with clearly stated definitions.
 
-**Completion criterion:** reproduce the procedure on CPU and GPU, preserve comparable per-request evidence, and explain which components each metric includes. TTFT requires token observations; total generation time alone cannot recover it.
+- **Skipped:** rerunning CPU inference to recover complete exports. The existing CPU record remains a reviewed summary.
+- **Skipped:** CPU token diagnostics and a CPU/GPU token-level comparison. CPU TTFT/TPOT/ITL remain unmeasured.
+
+**Completion criterion:** reproduce GPU measurements across representative workloads, preserve comparable per-request evidence, and explain which components each metric includes. TTFT requires token observations; total generation time alone cannot recover it. Skipped CPU work does not block this milestone.
 
 ### 3. Explain and optimize inference performance
 
@@ -101,20 +127,20 @@ The initial focus is LLM inference. The lessons in workload measurement, resourc
 
 Run separate experiments with a prediction, one changed variable, and a saved explanation.
 
-- [ ] Sweep CPU thread settings while keeping model, precision, and workload fixed.
-- [ ] Inspect CPU utilization and distinguish logical CPUs, physical cores, and PyTorch thread settings.
+- [ ] Inspect GPU utilization and memory behavior; observe host overhead when it affects GPU execution.
 - [ ] Increase input length while keeping the output budget fixed; inspect actual output lengths.
 - [ ] Increase the output budget while keeping the prompt fixed; inspect actual output lengths.
 - [ ] Profile prefill and decode separately; distinguish host overhead, device execution, and memory movement.
 - [ ] Compare request caching enabled/disabled and inspect output correctness as well as performance.
 - [ ] Increase static batch size, handle padding correctly, and compare latency with aggregate throughput.
 - [ ] Compare GPU FP32 and FP16 where supported; record speed, memory, and response differences.
-- [ ] Explore CPU-supported lower precision or quantization as a separate experiment.
 - [ ] Test quantization, including AWQ when supported, against an unquantized quality/performance baseline.
 - [ ] Explore compilation after measuring the eager baseline; separate compilation and steady-state costs.
 - [ ] Investigate a bounded out-of-memory condition and recover the runtime.
 
-**Completion criterion:** identify a useful operating point for a defined workload and support the choice with measurements, including any quality or memory tradeoff. More threads or a newer GPU is a hypothesis to test.
+- **Skipped:** standalone CPU thread sweeps, CPU-only utilization studies, and CPU-specific precision/quantization benchmarks.
+
+**Completion criterion:** identify a useful GPU operating point for a defined workload and support the choice with measurements, including any quality or memory tradeoff. A newer GPU or lower precision is a hypothesis to test.
 
 ### 4. Serve one model over HTTP
 
@@ -242,14 +268,15 @@ Start after measuring single-device limits. Choose the experiments that answer a
 
 ```text
 README.md                         # Learning sequence, completion checklist, and next action
-notebooks/01-gpu-inference.ipynb   # Current hands-on lesson
+notebooks/01-gpu-inference.ipynb   # Completed introductory CPU/GPU lesson
+notebooks/02-gpu-benchmark.ipynb   # Executed GPU workload/precision lesson; interpretation in progress
 notebooks/archive/                # Earlier executed notebooks
 results/cpu-vs-gpu.md              # Benchmark comparison, configurations, and findings
 results/*.json                    # Preserved structured measurements or labeled summaries
-results/*.csv                     # Preserved per-request tables
+results/*.csv                     # Preserved request tables and brief explanatory comparisons
 runs/                             # Ignored runtime outputs; export before runtime replacement
 src/                              # Shared helpers, introduced when needed
 scripts/                          # Serving/load/deployment commands, introduced later
 ```
 
-The existing CPU/GPU lesson uses PyTorch and Transformers. Colab provides experiment runtimes; a GPU host will provide the persistent serving environment. Model choices and exact run configurations are recorded in the benchmark report so this guide can continue as those choices evolve.
+The lessons use PyTorch and Transformers for direct GPU inference, followed by a GPU serving engine. Colab provides experiment runtimes; a GPU host will provide the persistent serving environment. Model choices and exact run configurations are recorded in the benchmark report so this guide can continue as those choices evolve.

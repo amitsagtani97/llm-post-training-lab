@@ -4,6 +4,8 @@ Recorded November 22, 2026. This report compares batch-size-1, FP32 inference wi
 
 **Observed result:** the latest uninstrumented T4 run generated the same 56-token response in a median **1.352 seconds**, compared with **13.257 seconds** on CPU: **9.81× faster**, or **89.80% lower generation latency**. Separate T4 token diagnostics measured median **35.59 ms TTFT** and **24.23 ms TPOT**. CPU token timings have not been measured.
 
+**Scope update:** subsequent learning and experiments focus on GPU infrastructure. Additional CPU benchmarks, raw-export recovery runs, and CPU token diagnostics are skipped by decision. This report preserves the completed CPU comparison and its evidence limitations; missing CPU metrics remain unmeasured.
+
 ## Evidence and saved artifacts
 
 | Run | Evidence retained | Artifacts |
@@ -168,9 +170,9 @@ GPU token arrays end in EOS ID `7`, explaining why generation stopped at 56 IDs 
 
 1. Open [the inference notebook](../notebooks/01-gpu-inference.ipynb), install its pinned dependencies, and restart after upgrading an already imported library.
 2. Use the recorded model revision, prompt, FP32 precision, greedy settings, and seed. Confirm the selected device and dependency versions before loading.
-3. Run CPU and GPU as separate recorded environments. Preserve the original baseline, and run the optional diagnostics as a separate measurement mode on both devices.
+3. To reproduce the historical CPU/GPU comparison, treat the devices as separate recorded environments. For the current GPU-only learning path, preserve GPU baselines and run diagnostics as a separate measurement mode on the same GPU.
 4. Export and preserve JSON, baseline CSV, and token-timing CSV before replacing a Colab runtime. Save the executed notebook's printed artifacts as well.
-5. Capture missing hardware details in a future experiment. Test CPU thread counts 1/2/4/8, GPU FP16, prompt/output lengths, and batch sizes as separate controlled changes.
+5. Capture missing GPU hardware details in a future experiment. Test GPU FP16, prompt/output lengths, and batch sizes as separate controlled changes. Additional CPU thread experiments are outside the current scope.
 6. Extend the prompt set and sample count before drawing broad performance or quality conclusions. Serving, streaming API timing, concurrency, and cost remain later milestones.
 
 The [main learning roadmap](../README.md) tracks those milestones. Earlier Qwen2.5 results remain in the [archived executed notebook](../notebooks/archive/01-qwen2.5-cpu.ipynb); they use another model/tokenizer and are excluded from this hardware comparison.
@@ -193,3 +195,4 @@ The entries below preserve the state of the work when each entry was written. Re
 | 2026-11-22 | Added an inline preview of the complete benchmark JSON and CSV | Preview reads the exported files and prints their sizes, responses, and measurements without rerunning inference | Run the preview after export and save the executed notebook |
 | 2026-11-22 | Reviewed successful LFM2.5 CPU/T4 runs, preserved the latest printed GPU artifacts, and added separate token diagnostics | Prior T4 rerun: 1.385 s and 40.425 tokens/s. Synthetic timing/export checks passed for prompt exclusion, TTFT/TPOT/ITL, short outputs, and diagnostics enabled/disabled; real token-timing execution pending | Rerun from section 2 and inspect baseline versus instrumented results |
 | 2026-11-22 | Preserved the executed GPU token-diagnostic exports and wrote the CPU/GPU comparison report | Latest T4 baseline: 1.352 s, 41.422 tokens/s; diagnostic TTFT 35.586 ms, TPOT 24.232 ms/token. Hardware/software and evidence limitations recorded; CPU outputs retained as a labeled summary | Run CPU token diagnostics and preserve complete exports |
+| 2026-11-22 | Changed future scope to GPU infrastructure and skipped additional CPU experiments | Existing results and missing-data labels preserved; skipped work was not marked as executed | Establish a repeatable GPU workload suite, then compare FP32/FP16 on the same T4 |

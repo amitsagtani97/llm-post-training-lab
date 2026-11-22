@@ -1,0 +1,73 @@
+section,workload,metric,unit,fp32,fp16,explanation
+result,short,input_tokens,tokens,66,66,Actual length after chat formatting.
+result,short,output_tokens,tokens,41,41,Constant across repeats. Includes terminal EOS.
+result,short,generation_seconds,seconds,1.0536,0.8319,"Lower is faster. Excludes loading, tokenization, input transfer and final text decoding. Median of 10 baseline measured requests per precision."
+result,short,output_tokens_per_second,tokens/second,38.9138,49.2882,Higher is faster. Includes the initial first-token wait. Median of 10 baseline measured requests per precision.
+result,short,peak_allocated_gib,GiB,4.3778,2.1946,Peak live tensor memory including model weights. Median of 10 baseline measured requests per precision.
+result,short,peak_reserved_gib,GiB,4.3867,2.2246,Peak allocator pool including allocated memory. Do not add these two metrics. Median of 10 baseline measured requests per precision.
+result,short,ttft_ms,milliseconds,72.704,25.3959,Time to first token callback. Includes input processing and framework overhead. Median of 3 diagnostic measured requests per precision.
+result,short,tpot_ms,milliseconds,24.8534,20.332,(generation time - TTFT) / (output tokens - 1). Includes completion cleanup. Median of 3 diagnostic measured requests per precision.
+result,short,mean_itl_ms,milliseconds,24.8428,20.3226,Mean adjacent token arrival gap. Excludes completion cleanup. Median of 3 diagnostic measured requests per precision.
+finding,short,fp16_speedup,times,,1.267,FP32 median generation time / FP16 median generation time.
+finding,short,fp16_latency_reduction,percent,,21.05,100 * (1 - FP16 median time / FP32 median time).
+quality,short,identical_output_ids,,true,true,Identical across all repeats and both precisions. Does not establish general answer quality.
+result,medium,input_tokens,tokens,353,353,Actual length after chat formatting.
+result,medium,output_tokens,tokens,38,38,Constant across repeats. Includes terminal EOS.
+result,medium,generation_seconds,seconds,1.1807,0.7763,"Lower is faster. Excludes loading, tokenization, input transfer and final text decoding. Median of 10 baseline measured requests per precision."
+result,medium,output_tokens_per_second,tokens/second,32.1841,48.9505,Higher is faster. Includes the initial first-token wait. Median of 10 baseline measured requests per precision.
+result,medium,peak_allocated_gib,GiB,4.4233,2.2152,Peak live tensor memory including model weights. Median of 10 baseline measured requests per precision.
+result,medium,peak_reserved_gib,GiB,4.4648,2.2461,Peak allocator pool including allocated memory. Do not add these two metrics. Median of 10 baseline measured requests per precision.
+result,medium,ttft_ms,milliseconds,252.0312,37.2784,Time to first token callback. Includes input processing and framework overhead. Median of 3 diagnostic measured requests per precision.
+result,medium,tpot_ms,milliseconds,25.4905,20.1298,(generation time - TTFT) / (output tokens - 1). Includes completion cleanup. Median of 3 diagnostic measured requests per precision.
+result,medium,mean_itl_ms,milliseconds,25.4789,20.12,Mean adjacent token arrival gap. Excludes completion cleanup. Median of 3 diagnostic measured requests per precision.
+finding,medium,fp16_speedup,times,,1.521,FP32 median generation time / FP16 median generation time.
+finding,medium,fp16_latency_reduction,percent,,34.25,100 * (1 - FP16 median time / FP32 median time).
+quality,medium,identical_output_ids,,true,true,Identical across all repeats and both precisions. Does not establish general answer quality.
+result,long,input_tokens,tokens,1337,1337,Actual length after chat formatting.
+result,long,output_tokens,tokens,38,38,Constant across repeats. Includes terminal EOS.
+result,long,generation_seconds,seconds,2.0472,0.913,"Lower is faster. Excludes loading, tokenization, input transfer and final text decoding. Median of 10 baseline measured requests per precision."
+result,long,output_tokens_per_second,tokens/second,18.5622,41.6221,Higher is faster. Includes the initial first-token wait. Median of 10 baseline measured requests per precision.
+result,long,peak_allocated_gib,GiB,4.5635,2.2874,Peak live tensor memory including model weights. Median of 10 baseline measured requests per precision.
+result,long,peak_reserved_gib,GiB,4.6719,2.3379,Peak allocator pool including allocated memory. Do not add these two metrics. Median of 10 baseline measured requests per precision.
+result,long,ttft_ms,milliseconds,1021.6696,173.6915,Time to first token callback. Includes input processing and framework overhead. Median of 3 diagnostic measured requests per precision.
+result,long,tpot_ms,milliseconds,26.7444,20.59,(generation time - TTFT) / (output tokens - 1). Includes completion cleanup. Median of 3 diagnostic measured requests per precision.
+result,long,mean_itl_ms,milliseconds,26.733,20.5793,Mean adjacent token arrival gap. Excludes completion cleanup. Median of 3 diagnostic measured requests per precision.
+finding,long,fp16_speedup,times,,2.242,FP32 median generation time / FP16 median generation time.
+finding,long,fp16_latency_reduction,percent,,55.4,100 * (1 - FP16 median time / FP32 median time).
+quality,long,identical_output_ids,,true,true,Identical across all repeats and both precisions. Does not establish general answer quality.
+model,all,name,,LiquidAI/LFM2.5-1.2B-Instruct,,Same checkpoint for both precisions.
+model,all,revision,,b9d816ab510f9a28dca37cb182e9da8b0226e13c,,
+model,all,parameter_count,parameters,1170340608,1170340608,Learned model numbers. No training in this experiment.
+model,all,parameter_gib,GiB,4.3599,2.1799,FP32 uses 4 bytes per weight. FP16 uses 2. Some operations may use higher precision internally.
+model,all,load_seconds,seconds,15.3636,1.3639,FP32 ran first. Cache and initialization confound this comparison. Excluded from generation timing.
+environment,all,gpu_name,,Tesla T4,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,device,,cuda:0,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,compute_capability,,"[7, 5]",,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,gpu_total_gib,,14.5632,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,gpu_free_gib_at_start,,14.4608,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,cuda_build,,13.0,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,cudnn_version,,92800,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,logical_cpu_count,,8,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,torch_cpu_threads,,4,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,system_ram_gib,,50.9903,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,python,,3.13.16,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,platform,,Linux-6.6.159+-x86_64-with-glibc2.39,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,float32_matmul_precision,,highest,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,cudnn_allow_tf32,,false,,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,nvidia_smi_inventory,,"index, name, driver_version, memory.total [MiB], memory.free [MiB], power.limit [W] | 0, Tesla T4, 580.82.07, 15360 MiB, 14910 MiB, 70.00 W",,Shared run environment. CPU/RAM fields describe the host; inference ran on GPU.
+environment,all,packages,,"{""huggingface-hub"": ""1.33.0"", ""psutil"": ""5.9.5"", ""safetensors"": ""0.8.0"", ""tokenizers"": ""0.22.2"", ""torch"": ""2.14.1+cu130"", ""transformers"": ""5.3.0""}",,"Recorded versions, not installation instructions."
+method,all,run_id,,20261122T214341Z-f97511de,,Source: saved export output in notebooks/02-gpu-benchmark.ipynb.
+method,all,requests,,96,,60 measured baseline + 18 measured diagnostic + 18 warmups. Zero runtime failures.
+method,all,settings,,"{""batch_size"": 1, ""diagnostic_runs"": 3, ""max_new_tokens"": 64, ""measured_runs"": 10, ""precision_order"": [""float32"", ""float16""], ""seed"": 42, ""warmups_per_baseline"": 2}",,One request at a time. FP32 then FP16. Same prompt order.
+method,all,generation,,greedy; max_new_tokens=64; cache enabled,,64 is an upper limit. All requests stopped naturally with EOS.
+method,all,baseline_vs_diagnostic,,separate,,Callbacks add work. Baseline TTFT/TPOT/ITL null means unmeasured; results are not pooled.
+finding,all,long_input_wait,,TTFT 72.7 to 1021.7 ms,,FP32 TPOT only changed from 24.9 to 26.7 ms. Initial waiting explains much of the output-rate drop.
+finding,all,fp16_effect,,half parameter storage,,Faster in these cases. Smaller values reduce weight traffic; exact kernel or bottleneck causes were not profiled.
+limits,all,scope,,3 repeated-note prompts; one T4; one fixed-order run,,"No general quality, concurrency, p95/p99 or HTTP latency claim. Repeat in reverse precision order to check order effects."
+concept,all,eval_and_inference_mode,,inference behavior; no gradient bookkeeping,,eval selects layer inference behavior. inference_mode avoids tracking gradients. Neither trains the model.
+concept,all,tokenization_and_mask,,text to IDs; valid input positions,,The tokenizer applies chat formatting. The attention mask identifies valid versus padded positions.
+concept,all,cache,,reuse prior context while decoding,,Each request starts a fresh cache. This does not reuse answers across requests.
+concept,all,synchronize,,wait for GPU completion,,Used around wall-clock timing because GPU execution is asynchronous.
+concept,all,warmup_and_median,,setup settling; middle measurement,,Warmups are recorded but excluded. Baseline medians use 10 measured requests per case.
+artifacts,all,results_json,,full run record,,"Configuration, responses, generated token IDs, individual token timestamps and summaries."
+artifacts,all,requests_csv_and_summary_csv,,individual requests; grouped medians,,Full raw exports remain printed in the executed notebook. This CSV is a rounded explanatory summary.
