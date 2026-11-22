@@ -44,3 +44,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Training runs and local outputs
+runs/
+outputs/
+checkpoints/
