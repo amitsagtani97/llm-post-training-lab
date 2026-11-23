@@ -6,13 +6,27 @@ This README contains the learning sequence and completion checklist. Check off a
 
 ## Start here
 
-- **Current lesson:** milestone 2 — trustworthy benchmarking and token-level latency.
-- **Next practical step:** review the completed FP32/FP16 run one comparison at a time: generation time, first-token wait, then memory. Continue to batching once those measurements are clear.
-- **Current notebook:** [02 — GPU workloads and precision](notebooks/02-gpu-benchmark.ipynb). Executed on a T4; 96 requests completed successfully. Interpretation is still being worked through. [Lesson 01](notebooks/01-gpu-inference.ipynb) remains available for reference.
+- **Current lesson:** static GPU batching, building on the measurement and precision lessons.
+- **Next practical step:** download notebook 03's detailed artifacts from Colab, then compare distinct prompts of similar lengths before introducing mixed-length inputs and padding.
+- **Current notebook:** [03 — Static batching](notebooks/03-static-batching.ipynb). Executed on a T4; the saved summary is reviewed in the [batching report](results/static-batching.md). Detailed exports still need preserving outside Colab. [Lesson 02](notebooks/02-gpu-benchmark.ipynb) contains the completed FP32/FP16 run; its interpretation checklist remains available below.
 - **Future scope:** GPU inference, memory, profiling, serving, and operations. Additional CPU benchmarks are skipped. Keep the existing CPU results as historical evidence, with their original limitations.
 - **Benchmark results and hardware configurations:** [CPU versus T4 GPU report](results/cpu-vs-gpu.md) and [FP32 versus FP16 summary CSV](results/gpu-fp32-vs-fp16.csv). The CSV includes measurements, definitions, hardware/software, reasoning, and limitations; full request records remain in the executed notebook.
+- **Static batching results:** [brief comparison](results/static-batching.md), with the observed configuration, numbers, interpretation, and raw-artifact availability.
 
-## Next lesson: repeatable GPU benchmarks and precision
+## Current experiment: static batching
+
+**Notebook:** [03 — Static batching](notebooks/03-static-batching.ipynb). Same pinned model, FP16, 12 copies of one short prompt, batch sizes 1/3/6, and three measured rounds with rotating configuration order. Warmups are separate.
+
+- [x] Execute the notebook on one GPU and verify input shapes and configuration.
+- [ ] Compare total completion time, requests/second, actual output tokens/second, batch latency, and peak memory.
+- [ ] Explain queue wait and request completion time; distinguish both from amortized time per request.
+- [x] Inspect the displayed response and verify the saved equality checks across batch sizes.
+- [ ] Inspect exact output lengths and per-request waiting/completion times in the detailed exports.
+- [ ] Download the JSON/CSV artifacts and preserve a brief reviewed comparison under `results/`.
+
+The notebook displays one compact table and saves every response. A real T4 run and its reviewed visible summary are recorded in the [batching report](results/static-batching.md). Detailed exports are still in Colab; their inspection and preservation remain open. Distinct prompts, padding effects, and continuous batching come later.
+
+## Previous experiment: repeatable GPU benchmarks and precision
 
 **Notebook:** [02 — GPU workloads: FP32 versus FP16](notebooks/02-gpu-benchmark.ipynb).
 
@@ -270,8 +284,10 @@ Start after measuring single-device limits. Choose the experiments that answer a
 README.md                         # Learning sequence, completion checklist, and next action
 notebooks/01-gpu-inference.ipynb   # Completed introductory CPU/GPU lesson
 notebooks/02-gpu-benchmark.ipynb   # Executed GPU workload/precision lesson; interpretation in progress
+notebooks/03-static-batching.ipynb # Executed static-batching lesson; detailed exports still in Colab
 notebooks/archive/                # Earlier executed notebooks
 results/cpu-vs-gpu.md              # Benchmark comparison, configurations, and findings
+results/static-batching.md         # Brief reviewed batching summary and artifact limitations
 results/*.json                    # Preserved structured measurements or labeled summaries
 results/*.csv                     # Preserved request tables and brief explanatory comparisons
 runs/                             # Ignored runtime outputs; export before runtime replacement
